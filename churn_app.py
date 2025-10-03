@@ -1,12 +1,77 @@
-
 import streamlit as st
 import pandas as pd
 import joblib
+import base64
 from sklearn.preprocessing import FunctionTransformer
 import plotly.express as px
 import plotly.figure_factory as ff
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+# ================= Background Image Function =================
+@st.cache_data
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+def set_png_as_page_bg(png_file):
+    bin_str = get_base64_of_bin_file(png_file)
+    page_bg_img = f'''
+    <style>
+    .stApp {{
+        background-image: url("data:image/webp;base64,{bin_str}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        color: #fff;
+        font-family: 'Segoe UI', sans-serif;
+    }}
+    
+    /* Overlay for better text readability */
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+    }}
+    
+    .block-container {{
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 25px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }}
+    
+    [data-testid="stSidebar"] {{
+        background: linear-gradient(180deg, rgba(44, 62, 80, 0.9), rgba(76, 161, 175, 0.9));
+        color: white;
+        backdrop-filter: blur(10px);
+    }}
+    
+    .big-title {{ 
+        font-size: 42px; 
+        text-align:center; 
+        font-weight:bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }}
+    
+    .sub-title {{ 
+        text-align:center; 
+        font-size:18px; 
+        color:#ddd; 
+        margin-bottom:30px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }}
+    </style>
+    '''
+    st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # ================= Feature Engineering =================
 def feature_engineering(df):
@@ -19,50 +84,13 @@ def feature_engineering(df):
 
 feature_engineer = FunctionTransformer(feature_engineering)
 
-# ================= Page Config + CSS =================
+# ================= Page Config =================
 st.set_page_config(page_title="Bank Churn Dashboard", layout="wide")
 
-page_bg = """
-<style>
-.stApp {
-    background: linear-gradient(-45deg, #283E51, #485563);
-    background-size: 400% 400%;
-    animation: gradient 20s ease infinite;
-    color: #fff;
-    font-family: 'Segoe UI', sans-serif;
-}
-@keyframes gradient { 
-    0%{background-position:0% 50%} 
-    50%{background-position:100% 50%} 
-    100%{background-position:0% 50%}
-}
-.block-container {
-    background-color: rgba(0,0,0,0.55);
-    padding: 25px;
-    border-radius: 12px;
-}
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #2c3e50, #4ca1af);
-    color: white;
-}
-.big-title { font-size: 42px; text-align:center; font-weight:bold; }
-.sub-title { text-align:center; font-size:18px; color:#ddd; margin-bottom:30px; }
-.big-btn {
-    display:inline-block;
-    background:#1abc9c;
-    color:white; 
-    padding:16px 30px; 
-    border-radius:8px;
-    font-size:18px; 
-    margin:10px;
-    text-decoration:none;
-    font-weight:bold;
-}
-.big-btn:hover { background:#16a085; color:#fff; }
-</style>
-"""
-st.markdown(page_bg, unsafe_allow_html=True)
+# Set background image
+set_png_as_page_bg("C:\\Users\\Taha mohamed\\OneDrive - Egyptian Chinese University (ECU)\\Epslion\\machine learning\\project3\\background\\photo-1565638459249-c85cbb2faaa8.jpeg")
 
+# باقي الكود يبقى نفسه...
 # ================= Load Data & Model =================
 df = pd.read_csv("cleaned_data.csv")
 model = joblib.load("stacking_model.pkl")
@@ -75,39 +103,31 @@ if "page" not in st.session_state:
     st.session_state["page"] = "🏠 Home"
 
 # ==== Custom CSS for Sidebar Style ====
+# ==== Custom Title CSS ====
 st.markdown("""
 <style>
-/* Sidebar background */
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg,#0F2027,#203A43,#2C5364);
-    color: white;
+.big-title {
+    font-size: 42px; 
+    text-align:center; 
+    font-weight:normal; 
+    background: linear-gradient(135deg,#00c6ff,#0072ff); 
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Title + labels */
-[data-testid="stSidebar"] h2, 
-[data-testid="stSidebar"] label, 
-[data-testid="stSidebar"] span {
-    color: #f1f1f1 !important;
-    font-weight: bold;
+.sub-title {
+    text-align:center; 
+    font-size:20px;
+    font-weight:normal;
+    margin-bottom:20px; 
+    background: linear-gradient(135deg,#f12711,#f5af19); 
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Radio button styling */
-div[role='radiogroup'] > label {
-    background: rgba(255,255,255,0.1);
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-div[role='radiogroup'] > label:hover {
-    background: rgba(255,255,255,0.3);
-}
-div[role='radiogroup'] > label[data-checked="true"] {
-    background: linear-gradient(90deg,#00c6ff,#0072ff);
-    color: white !important;
-    font-weight: bold;
-    border: 1px solid #fff;
+/* Subheadings */
+h2, .css-10trblm, .css-1d391kg {
+    color: #76EEC6 !important;  /* Light Cyan */
 }
 </style>
 """, unsafe_allow_html=True)
@@ -140,7 +160,7 @@ if st.session_state["page"] == "🏠 Home":
     .big-title {
         font-size: 42px; 
         text-align:center; 
-        font-weight:bold; 
+        font-weight:normal; 
         background: linear-gradient(135deg,#f12711,#f5af19);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -351,8 +371,7 @@ elif choice == "ℹ️ About Data":
 # ================= ANALYSIS =================
 # ================= ANALYSIS =================
 elif choice == "📊 Analysis":
-    st.title("📊 Customer Churn Analysis")
-    st.markdown("<div class='big-title'>📊 Customer Churn Analysis</div>", unsafe_allow_html=True)
+    st.markdown("<div class='big-title'>Customer Churn Analysis</div>", unsafe_allow_html=True)
 
     # ✅ مركز الصورة + تصغير الحجم
     st.markdown("""
@@ -396,8 +415,7 @@ elif choice == "📊 Analysis":
 
  
 elif choice == "🧩 EDA":
-    st.title("🧩 Exploratory Data Analysis")
-    st.markdown("<div class='big-title'>🧩 Exploratory Data Analysis</div>", unsafe_allow_html=True)
+    st.markdown("<div class='big-title'>Exploratory Data Analysis</div>", unsafe_allow_html=True)
 
     # ✅ مركز الصورة + تصغير الحجم
     st.markdown("""
